@@ -6,3 +6,44 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  email    String @unique
+  username String @unique
+  fullName String
+  codes    Code[] @relation("UserCodes")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Code {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  slug            String   @unique
+  title           String
+  description     String?
+  s3Key           String
+  language        Language @default(JAVASCRIPT)
+  exploitLocation String
+  access          Access   @default(public)
+
+  userId String @db.ObjectId
+  user   User?  @relation("UserCodes", fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Language {
+  JAVASCRIPT
+  TYPESCRIPT
+  PYTHON
+  GO
+  RUST
+}
+
+enum Access {
+  private
+  public
+}
